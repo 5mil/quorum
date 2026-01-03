@@ -1,0 +1,59 @@
+name: Windows Build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        arch: [x86_64, i686]
+        include:
+          - arch: x86_64
+            msystem: MINGW64
+            geth_arch: amd64
+          - arch: i686
+            msystem: MINGW32
+            geth_arch: 386
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
+
+    - name: Setup MSYS2
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: ${{ matrix.msystem }}
+        update: true
+        install: >-
+          mingw-w64-${{ matrix.arch }}-gcc
+          mingw-w64-${{ matrix.arch }}-make
+
+    - name: Setup Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.11'
+
+    - name: Build
+      shell: msys2 {0}
+      run: |
+        export PATH="/c/hostedtoolcache/windows/go/1.11*/x64/bin:$PATH"
+        export GOPATH="/c/Users/runneradmin/go"
+        export PATH="$PATH:$GOPATH/bin"
+        go version
+        gcc --version
+        go run build/ci.go install
+
+    - name: Test
+      shell: msys2 {0}
+      run: |
+        export PATH="/c/hostedtoolcache/windows/go/1.11*/x64/bin:$PATH"
+        export GOPATH="/c/Users/runneradmin/go"
+        export PATH="$PATH:$GOPATH/bin"
+        export CGO_ENABLED=1
+        go run build/ci.go test -coverage
