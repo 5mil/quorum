@@ -9,6 +9,8 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+    permissions:
+      contents: read
     env:
       GOPATH: /c/Users/runneradmin/go
     strategy:
