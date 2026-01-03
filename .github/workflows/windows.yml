@@ -42,7 +42,6 @@ jobs:
     - name: Build
       shell: msys2 {0}
       run: |
-        export PATH="/c/hostedtoolcache/windows/go/1.11*/x64/bin:$PATH"
         export GOPATH="/c/Users/runneradmin/go"
         export PATH="$PATH:$GOPATH/bin"
         go version
@@ -52,7 +51,6 @@ jobs:
     - name: Test
       shell: msys2 {0}
       run: |
-        export PATH="/c/hostedtoolcache/windows/go/1.11*/x64/bin:$PATH"
         export GOPATH="/c/Users/runneradmin/go"
         export PATH="$PATH:$GOPATH/bin"
         export CGO_ENABLED=1
