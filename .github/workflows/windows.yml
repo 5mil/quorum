@@ -9,6 +9,8 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+    env:
+      GOPATH: /c/Users/runneradmin/go
     strategy:
       matrix:
         arch: [x86_64, i686]
@@ -42,8 +44,6 @@ jobs:
     - name: Build
       shell: msys2 {0}
       run: |
-        export GOPATH="/c/Users/runneradmin/go"
-        export PATH="$PATH:$GOPATH/bin"
         go version
         gcc --version
         go run build/ci.go install
@@ -51,7 +51,5 @@ jobs:
     - name: Test
       shell: msys2 {0}
       run: |
-        export GOPATH="/c/Users/runneradmin/go"
-        export PATH="$PATH:$GOPATH/bin"
         export CGO_ENABLED=1
         go run build/ci.go test -coverage
