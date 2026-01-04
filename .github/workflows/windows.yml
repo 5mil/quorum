@@ -1,0 +1,60 @@
+name: Windows Build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    env:
+      GOPATH: /c/Users/runneradmin/go
+      GOROOT: /c/go
+    strategy:
+      matrix:
+        arch: [x86_64, i686]
+        include:
+          - arch: x86_64
+            msystem: MINGW64
+            geth_arch: amd64
+          - arch: i686
+            msystem: MINGW32
+            geth_arch: 386
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - name: Setup MSYS2
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: ${{ matrix.msystem }}
+        update: true
+        install: >-
+          mingw-w64-${{ matrix.arch }}-gcc
+          mingw-w64-${{ matrix.arch }}-make
+
+    - name: Setup Go
+      shell: msys2 {0}
+      run: |
+        curl -fL -o go1.11.13.windows-${{ matrix.geth_arch }}.zip https://golang.org/dl/go1.11.13.windows-${{ matrix.geth_arch }}.zip
+        unzip -q go1.11.13.windows-${{ matrix.geth_arch }}.zip -d /c/ || { echo "Failed to extract Go"; exit 1; }
+        echo "/c/go/bin" >> $GITHUB_PATH
+
+    - name: Build
+      shell: msys2 {0}
+      run: |
+        go version
+        gcc --version
+        go run build/ci.go install
+
+    - name: Test
+      shell: msys2 {0}
+      run: |
+        export CGO_ENABLED=1
+        go run build/ci.go test -coverage
