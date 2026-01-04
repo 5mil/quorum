@@ -13,6 +13,7 @@ jobs:
       contents: read
     env:
       GOPATH: /c/Users/runneradmin/go
+      GOROOT: /c/go
     strategy:
       matrix:
         arch: [x86_64, i686]
@@ -39,9 +40,11 @@ jobs:
           mingw-w64-${{ matrix.arch }}-make
 
     - name: Setup Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: '1.11'
+      shell: msys2 {0}
+      run: |
+        curl -fL -o go1.11.13.windows-${{ matrix.geth_arch }}.zip https://golang.org/dl/go1.11.13.windows-${{ matrix.geth_arch }}.zip
+        unzip -q go1.11.13.windows-${{ matrix.geth_arch }}.zip -d /c/ || { echo "Failed to extract Go"; exit 1; }
+        echo "/c/go/bin" >> $GITHUB_PATH
 
     - name: Build
       shell: msys2 {0}
