@@ -42,14 +42,13 @@ jobs:
     - name: Setup Go
       shell: msys2 {0}
       run: |
-        curl -L -o go1.11.13.windows-${{ matrix.geth_arch }}.zip https://golang.org/dl/go1.11.13.windows-${{ matrix.geth_arch }}.zip
-        unzip -q go1.11.13.windows-${{ matrix.geth_arch }}.zip -d /c/
+        curl -fL -o go1.11.13.windows-${{ matrix.geth_arch }}.zip https://golang.org/dl/go1.11.13.windows-${{ matrix.geth_arch }}.zip
+        unzip -q go1.11.13.windows-${{ matrix.geth_arch }}.zip -d /c/ || { echo "Failed to extract Go"; exit 1; }
         echo "/c/go/bin" >> $GITHUB_PATH
 
     - name: Build
       shell: msys2 {0}
       run: |
-        export PATH="/c/go/bin:$PATH"
         go version
         gcc --version
         go run build/ci.go install
@@ -57,6 +56,5 @@ jobs:
     - name: Test
       shell: msys2 {0}
       run: |
-        export PATH="/c/go/bin:$PATH"
         export CGO_ENABLED=1
         go run build/ci.go test -coverage
